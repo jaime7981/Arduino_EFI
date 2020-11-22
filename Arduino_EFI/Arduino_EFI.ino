@@ -11,6 +11,12 @@ bool spark_sensor;
 
 float AF_ratio = 14;
 
+bool alternate_in_out = true;
+
+float tiempo_inicio;
+float tiempo_final;
+float variacion_tiempo;
+
 void setup() {
   Serial.begin(9600);
   pinMode(iny_output, OUTPUT);
@@ -21,6 +27,19 @@ void setup() {
 
 void loop() {
   run_time = millis();
+  
+  if (TrueToFalse(alternate_in_out) == true){
+    tiempo_inicio = run_time;
+  }
+  else if (TrueToFalse(alternate_in_out) == false){
+    tiempo_final = run_time;
+    variacion_tiempo = tiempo_final - tiempo_inicio;
+  }
+
+  if (alternate_in_out == true){
+    Serial.print(3600 * 4/variacion_tiempo);
+  }
+  Serial.println(alternate_in_out);
   
   if (digitalRead(spark_input) > 10){
     spark_sensor = true;
@@ -41,4 +60,13 @@ float RevCalc(){
   }
   rev = 3600 * (spark_pulse / new_time);
   return rev;
+}
+
+bool TrueToFalse(bool valor){
+  if (valor == true){
+    return false;
+  }
+  if (valor == false){
+    return true;
+  }
 }
