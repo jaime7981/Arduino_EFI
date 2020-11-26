@@ -1,21 +1,23 @@
 unsigned long run_time;
+float mili_to_hrs = 2.7777777777777776 * pow(10,-7);
+float mili_to_min = 0.0000166667;
 float rev;
 
 int iny_output;
-
 float throtle_input;
-
 int spark_input;
+
 int spark_pulse;
 bool spark_sensor;
-
-float AF_ratio = 14;
+int spark_input_simulator;
 
 bool alternate_in_out = true;
 
 float tiempo_inicio;
 float tiempo_final;
 float variacion_tiempo;
+float variacion_tiempo_inyeccion;
+float variacion_tiempo_inyeccion_alternativo;
 
 void setup() {
   Serial.begin(9600);
@@ -27,46 +29,44 @@ void setup() {
 
 void loop() {
   run_time = millis();
-  
-  if (TrueToFalse(alternate_in_out) == true){
-    tiempo_inicio = run_time;
-  }
-  else if (TrueToFalse(alternate_in_out) == false){
-    tiempo_final = run_time;
-    variacion_tiempo = tiempo_final - tiempo_inicio;
-  }
 
-  if (alternate_in_out == true){
-    Serial.print(3600 * 4/variacion_tiempo);
-  }
-  Serial.println(alternate_in_out);
+  spark_input_simulator = random(0,5); // simula una vuelta del motor
   
-  if (digitalRead(spark_input) > 10){
+  if (spark_input_simulator > 3){ // deberia ser el input de la bujia digitalRead(spark_input)
     spark_sensor = true;
+  }
+  else{
+    spark_sensor = false;
   }
   
   if (spark_sensor == true){
-    spark_pulse += 1;
-  } 
-  spark_sensor = false;
-  Serial.println(RevCalc());
-
+    spark_pulse += 1; // Contaria las veces que hay chispa
+    RevCalc();
+    Serial.println(rev);
+  }
 }
 
+
 float RevCalc(){
-  float new_time = run_time % 1000;
-  if (new_time == 0){
-    spark_pulse = 0;
+  if (alternate_in_out == true){
+    tiempo_inicio = run_time;
+    variacion_tiempo = tiempo_inicio - tiempo_final;
+    variacion_tiempo_inyeccion = variacion_tiempo;
+    alternate_in_out = false;
+    TiempoInyeccion();
   }
-  rev = 3600 * (spark_pulse / new_time);
+  else if (alternate_in_out == false){
+    tiempo_final = run_time;
+    variacion_tiempo = tiempo_final - tiempo_inicio;
+    variacion_tiempo_inyeccion_alternativo;
+    alternate_in_out = true;
+  }
+  
+  rev = (1/variacion_tiempo)/mili_to_hrs; // Calcula las revoluciones segun la variacion de milisegundos en dos vueltas
   return rev;
 }
 
-bool TrueToFalse(bool valor){
-  if (valor == true){
-    return false;
-  }
-  if (valor == false){
-    return true;
-  }
+void TiempoInyeccion(){
+  variacion_tiempo_inyeccion = variacion_tiempo_inyeccion/2; // Tiempo valvula de aire abierta
+  Serial.println(variacion_tiempo_inyeccion);
 }
