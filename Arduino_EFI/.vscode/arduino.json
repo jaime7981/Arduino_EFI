@@ -1,5 +1,6 @@
 {
-    "board": "arduino:avr:mega",
-    "configuration": "cpu=atmega2560",
-    "sketch": "Arduino_EFI.ino"
+    "board": "arduino:avr:nano",
+    "configuration": "cpu=atmega328",
+    "sketch": "Arduino_EFI.ino",
+    "port": "/dev/ttyUSB0"
 }
